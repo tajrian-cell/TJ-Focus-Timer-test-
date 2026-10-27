@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TJ focus</title>
+<meta name="theme-color" content="#12263a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TJ focus">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<style>
+:root{--bg:#e9eff3;--surface:#fff;--ink:#12263a;--mute:#5d7184;--line:#cfd9e1;--focus:#2a55f0;--rest:#12957e;--on:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1822;--surface:#16242f;--ink:#e8f0f6;--mute:#8ea3b4;--line:#2a3b49;--focus:#6f8cff;--rest:#3cc7ad;--on:#0e1822;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1822;--surface:#16242f;--ink:#e8f0f6;--mute:#8ea3b4;--line:#2a3b49;--focus:#6f8cff;--rest:#3cc7ad;--on:#0e1822;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center;transition:background .4s}
+.app{width:100%;max-width:420px;padding:20px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:26px}
+header{width:100%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800;font-size:1.35rem;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.icon{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.tabs{display:grid;grid-template-columns:1fr 1fr;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tab{border:0;background:none;padding:11px;border-radius:999px;font-weight:700;color:var(--mute);transition:background .25s,color .25s}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--on)}
+.dial{position:relative;width:min(300px,78vw);aspect-ratio:1}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.track{stroke:var(--line)}
+.bar{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .4s}
+.readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.time{font-size:clamp(3.2rem,16vw,4.4rem);font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.label{color:var(--mute);font-weight:500}
+.controls{display:flex;align-items:center;gap:16px}
+.go{min-width:150px;height:60px;border:0;border-radius:999px;background:var(--accent);color:var(--on);font-weight:800;font-size:1.1rem;transition:background .4s}
+.go:active{transform:scale(.97)}
+.side{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.dots{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--mute);font-weight:500}
+.dots div{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:260px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.dot.on{background:var(--focus)}
+dialog{border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);width:min(380px,calc(100vw - 32px));padding:22px}
+dialog::backdrop{background:rgba(8,16,24,.55)}
+dialog h2{margin:0 0 16px;font-size:1.2rem}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row input[type=number]{width:84px;font:inherit;font-weight:700;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);text-align:center}
+.row input[type=checkbox]{width:22px;height:22px;accent-color:var(--focus)}
+.hint{color:var(--mute);font-size:.85rem;margin:0 0 4px}
+.close{margin-top:14px;width:100%;height:48px;border:0;border-radius:12px;background:var(--ink);color:var(--bg);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app" id="app">
+  <header>
+    <div class="logo">TJ <span>focus</span></div>
+    <button class="icon" id="openSettings" aria-label="Open settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+    </button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Timer mode">
+    <button class="tab" role="tab" id="tabFocus" aria-selected="true">Focus</button>
+    <button class="tab" role="tab" id="tabRest" aria-selected="false">Rest</button>
+  </div>
+
+  <div class="dial">
+    <svg viewBox="0 0 280 280" aria-hidden="true">
+      <circle class="track" cx="140" cy="140" r="126" fill="none" stroke-width="10"/>
+      <circle class="bar" id="bar" cx="140" cy="140" r="126" fill="none" stroke-width="10"/>
+    </svg>
+    <div class="readout" role="timer" aria-live="off">
+      <div class="time" id="time">25:00</div>
+      <div class="label" id="label">Ready to study</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="side" id="reset" aria-label="Reset timer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+    <button class="go" id="go">Start</button>
+    <button class="side" id="skip" aria-label="Skip to next phase">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5l10 7-10 7zM18 5h2v14h-2z"/></svg>
+    </button>
+  </div>
+
+  <div class="dots">
+    <span id="count">0 focus sessions today</span>
+    <div id="dots"></div>
+  </div>
+</main>
+
+<dialog id="settings">
+  <h2>Settings</h2>
+  <p class="hint">Changes apply to the next time you start a phase.</p>
+  <div class="row"><label for="sFocus">Focus (minutes)</label><input type="number" id="sFocus" min="1" max="180" inputmode="numeric"></div>
+  <div class="row"><label for="sRest">Rest (minutes)</label><input type="number" id="sRest" min="1" max="60" inputmode="numeric"></div>
+  <div class="row"><label for="sAuto">Start next phase automatically</label><input type="checkbox" id="sAuto"></div>
+  <div class="row"><label for="sSound">Play a sound when time is up</label><input type="checkbox" id="sSound"></div>
+  <button class="close" id="closeSettings">Done</button>
+</dialog>
+
+<script>
+(function(){
+  var KEY="tjfocus:v1", C=2*Math.PI*126;
+  var S={focus:25,rest:5,auto:false,sound:true}, done=0, day=new Date().toDateString();
+  try{var raw=localStorage.getItem(KEY);if(raw){var d=JSON.parse(raw);if(d.s)Object.assign(S,d.s);if(d.day===day)done=d.done||0;}}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({s:S,day:day,done:done}));}catch(e){}}
+
+  var mode="focus", total=S.focus*60, left=total, running=false, endAt=0, timer=null;
+  var $=function(i){return document.getElementById(i)};
+  var root=document.documentElement, bar=$("bar");
+  bar.style.strokeDasharray=C;
+
+  function fmt(s){s=Math.max(0,Math.ceil(s));var m=Math.floor(s/60),r=s%60;return String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");}
+  function setAccent(){root.style.setProperty("--accent",mode==="focus"?"var(--focus)":"var(--rest)");}
+  function render(){
+    $("time").textContent=fmt(left);
+    bar.style.strokeDashoffset=C*(1-left/total);
+    $("label").textContent=running?(mode==="focus"?"Stay with it":"Take a breather"):(left<total?"Paused":(mode==="focus"?"Ready to study":"Rest up"));
+    $("go").textContent=running?"Pause":(left<total?"Resume":"Start");
+    $("tabFocus").setAttribute("aria-selected",mode==="focus");
+    $("tabRest").setAttribute("aria-selected",mode==="rest");
+    document.title=(running?fmt(left)+" · ":"")+"TJ focus";
+    $("count").textContent=done+(done===1?" focus session":" focus sessions")+" today";
+    var h="";for(var i=0;i<Math.min(done,24);i++)h+='<span class="dot on"></span>';
+    $("dots").innerHTML=h;
+    setAccent();
+  }
+  function setMode(m){
+    stop();mode=m;total=(m==="focus"?S.focus:S.rest)*60;left=total;render();
+  }
+  function tick(){
+    left=(endAt-Date.now())/1000;
+    if(left<=0){finish();return;}
+    render();
+  }
+  function start(){
+    if(running)return;running=true;endAt=Date.now()+left*1000;
+    timer=setInterval(tick,250);render();
+  }
+  function stop(){running=false;clearInterval(timer);timer=null;}
+  function finish(){
+    stop();left=0;
+    if(mode==="focus"){done++;save();}
+    if(S.sound)beep();
+    var next=mode==="focus"?"rest":"focus";
+    setMode(next);
+    if(S.auto)start();
+  }
+  function beep(){
+    try{
+      var A=window.AudioContext||window.webkitAudioContext,c=new A();
+      [0,.28,.56].forEach(function(t){
+        var o=c.createOscillator(),g=c.createGain();
+        o.type="sine";o.frequency.value=t===.56?880:660;
+        o.connect(g);g.connect(c.destination);
+        var n=c.currentTime+t;
+        g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(.25,n+.03);g.gain.exponentialRampToValueAtTime(.0001,n+.24);
+        o.start(n);o.stop(n+.26);
+      });
+    }catch(e){}
+  }
+
+  $("go").onclick=function(){
+    if(running){stop();render();}else start();
+  };
+  $("reset").onclick=function(){setMode(mode);};
+  $("skip").onclick=function(){setMode(mode==="focus"?"rest":"focus");};
+  $("tabFocus").onclick=function(){setMode("focus");};
+  $("tabRest").onclick=function(){setMode("rest");};
+  document.addEventListener("visibilitychange",function(){if(running)tick();});
+
+  var dlg=$("settings");
+  function fill(){$("sFocus").value=S.focus;$("sRest").value=S.rest;$("sAuto").checked=S.auto;$("sSound").checked=S.sound;}
+  function clamp(v,a,b,def){v=parseInt(v,10);if(isNaN(v))return def;return Math.min(b,Math.max(a,v));}
+  function apply(){
+    S.focus=clamp($("sFocus").value,1,180,S.focus);
+    S.rest=clamp($("sRest").value,1,60,S.rest);
+    S.auto=$("sAuto").checked;S.sound=$("sSound").checked;
+    save();
+    if(!running&&left===total){total=(mode==="focus"?S.focus:S.rest)*60;left=total;}
+    render();
+  }
+  ["sFocus","sRest","sAuto","sSound"].forEach(function(i){$(i).addEventListener("change",apply);});
+  $("openSettings").onclick=function(){fill();dlg.showModal();};
+  $("closeSettings").onclick=function(){apply();fill();dlg.close();};
+  dlg.addEventListener("click",function(e){if(e.target===dlg){apply();dlg.close();}});
+
+  fill();render();
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+</script>
+</body>
+</html>
